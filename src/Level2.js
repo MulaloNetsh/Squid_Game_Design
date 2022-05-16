@@ -3,7 +3,6 @@ import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/j
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 
 let insetWidth, insetHeight;
-var isPlay=false;
 let dollState="forward";
 let playerState="idle";
 let gameState="play";
@@ -45,7 +44,7 @@ class BasicCharacterController {
     loader.load('Player.fbx', (fbx) => {
       fbx.scale.setScalar(7);
       fbx.rotation.set(0, 60, 0);
-      fbx.position.set(5, 0, 250)
+      fbx.position.set(0, 0, 250)
       fbx.traverse(c => {
         c.castShadow = true;
       });
@@ -189,11 +188,17 @@ class BasicCharacterControllerInput {
   _onKeyDown(event) {
     if(dollState=="forward" && playerState=="play")
     {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
-      }
+      ('You Lost!').dialog(
+        {
+            modal:true, //Not necessary but dims the page background
+            buttons:{
+                'Restart':function() {
+                    window.location.reload();
+                 },
+            }
+        }
+    );
+      
     }
     if(playerState=="idle")
     {
@@ -225,11 +230,17 @@ class BasicCharacterControllerInput {
   _onKeyUp(event) {
     if(dollState=="forward" && playerState=="play")
     {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
-      }
+      ('You Lost!').dialog(
+        {
+            modal:true, //Not necessary but dims the page background
+            buttons:{
+                'Restart':function() {
+                    window.location.reload();
+                 },
+            }
+        }
+    ); 
+  
     }
     if(playerState=="idle")
     {
@@ -608,9 +619,6 @@ class ThirdPersonCameraDemo {
     light = new THREE.AmbientLight(0xFFFFFF, 0.25);
     this._scene.add(light);
 
-    const music = new Audio('./music/Squid_Game_Theme.mp3')
-    music.loop = true;
-
     this.addGround();
     this.addCheckpointLine();
     this.addTree();
@@ -624,7 +632,6 @@ class ThirdPersonCameraDemo {
     {
     setTimeout(() => {
       startBtn.innerText = "start"
-      
     }, 4000);
 
     setTimeout(() => {
@@ -632,7 +639,6 @@ class ThirdPersonCameraDemo {
         if (startBtn.innerText == "START") {
           document.querySelector('.modal').style.display = "none"
         }
-        music.play();
         this.timer();
       })
     }, 1000);
@@ -765,19 +771,18 @@ class ThirdPersonCameraDemo {
 
   lookBackward() {
     gsap.to(this.doll.rotation, { y: -3.15, duration: 2 })
-    setTimeout(() => dollState="back", 500)
+    dollState="back"
   }
-   lookForward() {
+  lookForward() {
     gsap.to(this.doll.rotation, { y: 0, duration: 2 })
-    setTimeout(() => dollState="forward", 2000)
-    
+    dollState="forward"
   }
 
   async start() {
     this.lookBackward();
-    await this.delay((Math.random() * 1000) + 5000);
+    await this.delay((Math.random() * 1000) + 3000);
     this.lookForward();
-    await this.delay((Math.random() * 1000) + 5000);
+    await this.delay((Math.random() * 1000) + 3000);
     this.start();
 
   }
@@ -800,17 +805,9 @@ class ThirdPersonCameraDemo {
     await this.delay(1000)
     this.start();
     playerState="play";
-    for (let i = 120; i >= 0; i--) {
+    for (let i = 60; i >= 0; i--) {
       text.innerText = (i + " : Seconds Left");
       await this.delay(1000)
-    }
-    if(text.innerText=="0 : Seconds Left")
-    {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
-      }
     }
 
   }
