@@ -3,11 +3,15 @@ import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/j
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 
 let insetWidth, insetHeight;
-var isPlay=false;
-let dollState="forward";
-let playerState="idle";
-let gameState="play";
+let dollState = "forward"; //keeps track of whether the doll is facing the player or not
+let playerState = "idle"; //prevents the player from player before the timer starts
+let gameState = "play";
 let text = document.querySelector(".text");
+
+//plays when doll is turning back
+const playDollSound = new Audio('./music/squid_game_robot.mp3')
+
+
 class BasicCharacterControllerProxy {
   constructor(animations) {
     this._animations = animations;
@@ -19,6 +23,10 @@ class BasicCharacterControllerProxy {
 };
 
 
+//This class is used to load the player model
+//It will also load the animations for the player
+//The player is able to move forward, backward
+//turn left or right, run and dance
 class BasicCharacterController {
   constructor(params) {
     this._Init(params);
@@ -45,7 +53,7 @@ class BasicCharacterController {
     loader.load('Player.fbx', (fbx) => {
       fbx.scale.setScalar(7);
       fbx.rotation.set(0, 60, 0);
-      fbx.position.set(5, 0, 250)
+      fbx.position.set(60, 0, 250)
       fbx.traverse(c => {
         c.castShadow = true;
       });
@@ -79,6 +87,7 @@ class BasicCharacterController {
     });
   }
 
+  //returns players current position
   get Position() {
     return this._position;
   }
@@ -167,6 +176,9 @@ class BasicCharacterController {
   }
 };
 
+
+//This class handles the keyboard input
+// The keys used are W A S D, shift and space bar
 class BasicCharacterControllerInput {
   constructor() {
     this._Init();
@@ -187,52 +199,53 @@ class BasicCharacterControllerInput {
   }
 
   _onKeyDown(event) {
-    if(dollState=="forward" && playerState=="play")
-    {
+    //handle the case of when a player moves when the doll is facing them
+    // A dialog box is shown telling the loser they lost
+    // it also provides them with a chance to replay the level
+    // or exit to the main menu 
+    if (dollState == "forward" && playerState == "play") {
       if (confirm("You Lost! Restart?")) {
         window.location.reload();
       } else {
         window.location.replace("./menu.html");
       }
     }
-    if(playerState=="idle")
-    {
+    if (playerState == "idle") {
       return
     }
     switch (event.keyCode) {
-      case 87: // w
+      case 87: // w walk forward
         this._keys.forward = true;
         break;
-      case 65: // a
+      case 65: // a turn left
         this._keys.left = true;
         break;
-      case 83: // s
+      case 83: // s walk back
         this._keys.backward = true;
         break;
-      case 68: // d
+      case 68: // d turn left
         this._keys.right = true;
         break;
-      case 32: // SPACE
+      case 32: // SPACE DANCE
         this._keys.space = true;
         break;
-      case 16: // SHIFT
+      case 16: // SHIFT in line with w to run
         this._keys.shift = true;
         break;
     }
-    
+
   }
 
   _onKeyUp(event) {
-    if(dollState=="forward" && playerState=="play")
-    {
+
+    if (dollState == "forward" && playerState == "play") {
       if (confirm("You Lost! Restart?")) {
         window.location.reload();
       } else {
         window.location.replace("./menu.html");
       }
     }
-    if(playerState=="idle")
-    {
+    if (playerState == "idle") {
       return
     }
     switch (event.keyCode) {
@@ -255,11 +268,14 @@ class BasicCharacterControllerInput {
         this._keys.shift = false;
         break;
     }
-    
+
   }
 };
 
-
+//FSM : Handles the states of the player
+// Makes sure that the player is only ever in 
+//one state at a time
+// The States are Idle, Walk, Run & Dance
 class FiniteStateMachine {
   constructor() {
     this._states = {};
@@ -504,7 +520,9 @@ class IdleState extends State {
   }
 };
 
-
+//This class is the third person camer
+// it follows the player from behind 
+//
 class ThirdPersonCamera {
   constructor(params) {
     this._params = params;
@@ -532,8 +550,6 @@ class ThirdPersonCamera {
     const idealOffset = this._CalculateIdealOffset();
     const idealLookat = this._CalculateIdealLookat();
 
-    // const t = 0.05;
-    // const t = 4.0 * timeElapsed;
     const t = 1.0 - Math.pow(0.001, timeElapsed);
 
     this._currentPosition.lerp(idealOffset, t);
@@ -544,7 +560,9 @@ class ThirdPersonCamera {
   }
 }
 
-
+//The main Class that sets up the scene
+// sets up the player and the player controls
+// and sets up the states 
 class ThirdPersonCameraDemo {
   constructor() {
     this._Initialize();
@@ -576,6 +594,8 @@ class ThirdPersonCameraDemo {
     this._camera.position.set(100, -100, 0);
 
 
+    //This camera is used for the top view of the scene
+    // its a child to the third person camera
     this.cameraTop = new THREE.PerspectiveCamera(80, aspect, near, far);
     this.cameraTop.position.set(10, 120, 80);
     this.cameraTop.lookAt(15, 100, 40);
@@ -588,7 +608,13 @@ class ThirdPersonCameraDemo {
     this._scene.background = bgTexture;
 
     this._scene.add(this._camera);
-    let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+
+    //Adding Ambient Light to scene
+    let light = new THREE.AmbientLight(0xFFFFFF, 0.25);
+    this._scene.add(light);
+
+    //Adding Directioal Light to scene 
+    light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
     light.position.set(-100, 100, 100);
     light.target.position.set(0, 0, 0);
     light.castShadow = true;
@@ -605,11 +631,10 @@ class ThirdPersonCameraDemo {
     light.shadow.camera.bottom = -50;
     this._scene.add(light);
 
-    light = new THREE.AmbientLight(0xFFFFFF, 0.25);
-    this._scene.add(light);
-
+    //Background music, triggered when timer starts
     const music = new Audio('./music/Squid_Game_Theme.mp3')
     music.loop = true;
+
 
     this.addGround();
     this.addCheckpointLine();
@@ -620,22 +645,27 @@ class ThirdPersonCameraDemo {
     //add Doll
     this.doll = this.loadDoll();
 
-    if(gameState=="play")
-    {
-    setTimeout(() => {
-      startBtn.innerText = "start"
-      
-    }, 4000);
+    //waits for the scene and models to load
+    // then the button in the instruction pane will 
+    // say start
+    if (gameState == "play") {
+      setTimeout(() => {
+        startBtn.innerText = "start"
 
-    setTimeout(() => {
-      startBtn.addEventListener('click', () => {
-        if (startBtn.innerText == "START") {
-          document.querySelector('.modal').style.display = "none"
-        }
-        music.play();
-        this.timer();
-      })
-    }, 1000);
+      }, 4000);
+
+      // when the user clicks the start button
+      //the modal will dissapper and the timer will start counting down
+      setTimeout(() => {
+        startBtn.addEventListener('click', () => {
+          if (startBtn.innerText == "START") {
+            document.querySelector('.modal').style.display = "none"
+          }
+          music.play();
+          this.timer();
+         // this.check();
+        })
+      }, 1000);
     }
     this._LoadAnimatedModel();
     this._OnWindowResize();
@@ -764,22 +794,42 @@ class ThirdPersonCameraDemo {
   }
 
   lookBackward() {
+    playDollSound.currentTime = 0;
+    playDollSound.play();
     gsap.to(this.doll.rotation, { y: -3.15, duration: 2 })
-    setTimeout(() => dollState="back", 500)
+    setTimeout(() => dollState = "back", 500)
   }
-   lookForward() {
+  lookForward() {
     gsap.to(this.doll.rotation, { y: 0, duration: 2 })
-    setTimeout(() => dollState="forward", 2000)
-    
+    setTimeout(() => dollState = "forward", 2000)
+    playDollSound.pause();
   }
 
   async start() {
+    if (this._controls._position.z < -196.5) {
+      if (confirm("You Won! Try Level 2?")) {
+        window.location.replace("./Level2.html");
+      } else {
+        window.location.reload();
+      }
+    }
     this.lookBackward();
     await this.delay((Math.random() * 1000) + 5000);
     this.lookForward();
     await this.delay((Math.random() * 1000) + 5000);
     this.start();
 
+  }
+
+  check() {
+    if (this._controls._position.z < -196.5) {
+      if (confirm("You Won! Try Level 2?")) {
+        window.location.replace("./menu.html");
+      } else {
+        window.location.reload();
+      }
+    }
+    this.check();
   }
 
   delay(ms) {
@@ -799,13 +849,12 @@ class ThirdPersonCameraDemo {
     text.innerText = "Starting in 1"
     await this.delay(1000)
     this.start();
-    playerState="play";
+    playerState = "play";
     for (let i = 120; i >= 0; i--) {
       text.innerText = (i + " : Seconds Left");
       await this.delay(1000)
     }
-    if(text.innerText=="0 : Seconds Left")
-    {
+    if (text.innerText == "0 : Seconds Left") {
       if (confirm("You Lost! Restart?")) {
         window.location.reload();
       } else {
@@ -847,6 +896,7 @@ class ThirdPersonCameraDemo {
       }
 
       this._RAF();
+
 
       this._threejs.setViewport(0, 0, window.innerWidth, window.innerHeight);
       this._threejs.render(this._scene, this._camera);

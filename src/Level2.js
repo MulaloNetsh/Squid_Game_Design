@@ -7,6 +7,7 @@ let dollState="forward";
 let playerState="idle";
 let gameState="play";
 let text = document.querySelector(".text");
+const playDollSound = new Audio('./music/squid_game_robot.mp3')
 class BasicCharacterControllerProxy {
   constructor(animations) {
     this._animations = animations;
@@ -188,18 +189,14 @@ class BasicCharacterControllerInput {
   _onKeyDown(event) {
     if(dollState=="forward" && playerState=="play")
     {
-      ('You Lost!').dialog(
-        {
-            modal:true, //Not necessary but dims the page background
-            buttons:{
-                'Restart':function() {
-                    window.location.reload();
-                 },
-            }
-        }
-    );
-      
+      if (confirm("You Lost! Restart?")) {
+        window.location.reload();
+      } else {
+        window.location.replace("./menu.html");
+      }
     }
+      
+    
     if(playerState=="idle")
     {
       return
@@ -230,17 +227,11 @@ class BasicCharacterControllerInput {
   _onKeyUp(event) {
     if(dollState=="forward" && playerState=="play")
     {
-      ('You Lost!').dialog(
-        {
-            modal:true, //Not necessary but dims the page background
-            buttons:{
-                'Restart':function() {
-                    window.location.reload();
-                 },
-            }
-        }
-    ); 
-  
+      if (confirm("You Lost! Restart?")) {
+        window.location.reload();
+      } else {
+        window.location.replace("./menu.html");
+      }
     }
     if(playerState=="idle")
     {
@@ -625,6 +616,11 @@ class ThirdPersonCameraDemo {
     this.addSideWalls();
     this.addFrontWall();
     this.addBackWall();
+
+    //Background music, triggered when timer starts
+    const music = new Audio('./music/Squid_Game_Theme.mp3')
+    music.loop = true;
+
     //add Doll
     this.doll = this.loadDoll();
 
@@ -639,7 +635,9 @@ class ThirdPersonCameraDemo {
         if (startBtn.innerText == "START") {
           document.querySelector('.modal').style.display = "none"
         }
+        music.play();
         this.timer();
+        this.check();
       })
     }, 1000);
     }
@@ -770,23 +768,45 @@ class ThirdPersonCameraDemo {
   }
 
   lookBackward() {
-    gsap.to(this.doll.rotation, { y: -3.15, duration: 2 })
-    dollState="back"
+    playDollSound.currentTime = 0;
+    playDollSound.playbackRate = 1.5;
+    playDollSound.play();
+    gsap.to(this.doll.rotation, { y: -3.15, duration: 0.5 })
+    setTimeout(() => dollState="back", 100)
   }
   lookForward() {
-    gsap.to(this.doll.rotation, { y: 0, duration: 2 })
-    dollState="forward"
+    gsap.to(this.doll.rotation, { y: 0, duration: 0.5 })
+    setTimeout(() => dollState="forward", 500)
+    playDollSound.pause();
   }
 
   async start() {
+    if (this._controls._position.z < -196.5) {
+      if (confirm("You Won! Try Level 3?")) {
+        window.location.replace("./menu.html");
+      } else {
+        window.location.reload();
+      }
+    }
     this.lookBackward();
-    await this.delay((Math.random() * 1000) + 3000);
+    await this.delay((Math.random() * 1000) + 2000);
     this.lookForward();
-    await this.delay((Math.random() * 1000) + 3000);
+    await this.delay((Math.random() * 1000) + 2000);
     this.start();
-
+    
   }
 
+  check()
+  {
+    if(this._controls._position.z<-196.5){
+      if (confirm("You Won! Try Level 3?")) {
+        window.location.replace("./menu.html");
+      } else {
+        window.location.reload();
+      }
+    }
+    check();
+  }
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -844,6 +864,8 @@ class ThirdPersonCameraDemo {
       }
 
       this._RAF();
+
+      //check is player passes the line
 
       this._threejs.setViewport(0, 0, window.innerWidth, window.innerHeight);
       this._threejs.render(this._scene, this._camera);
