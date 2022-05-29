@@ -1,0 +1,11 @@
+Model Information:
+* title:	Snake sculpture
+* source:	https://sketchfab.com/3d-models/snake-sculpture-2b0c944a3f154ba58cc124ddabd8c806
+* author:	JimmyGun (https://sketchfab.com/JimmyGun)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Snake sculpture" (https://sketchfab.com/3d-models/snake-sculpture-2b0c944a3f154ba58cc124ddabd8c806) by JimmyGun (https://sketchfab.com/JimmyGun) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,332 @@
+{
+  "accessors": [
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        77.38854217529297,
+        600.9563598632813,
+        128.63125610351563
+      ],
+      "min": [
+        -320.4131164550781,
+        427.3658752441406,
+        -116.53360748291016
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 786384,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        0.9999550580978394,
+        0.999976396560669,
+        0.9999598860740662
+      ],
+      "min": [
+        -0.9999352097511292,
+        -0.999981164932251,
+        -0.9999618530273438
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 314430,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 1572768,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        82.06661224365234,
+        601.0933227539063,
+        127.48550415039063
+      ],
+      "min": [
+        -318.54949951171875,
+        417.9834289550781,
+        -115.65060424804688
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 2359152,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        0.9999550580978394,
+        0.9999964237213135,
+        0.999983012676239
+      ],
+      "min": [
+        -0.9998145699501038,
+        -0.9999785423278809,
+        -0.9999929666519165
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 1257720,
+      "componentType": 5125,
+      "count": 324288,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 3145536,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        80.5541763305664,
+        597.189697265625,
+        128.30735778808594
+      ],
+      "min": [
+        -320.4131164550781,
+        414.3561706542969,
+        -120.9185562133789
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 3931920,
+      "componentType": 5126,
+      "count": 65532,
+      "max": [
+        0.9999940395355225,
+        0.9999791979789734,
+        0.9999598860740662
+      ],
+      "min": [
+        -0.9999380707740784,
+        -0.9999811053276062,
+        -0.9999903440475464
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 2554872,
+      "componentType": 5125,
+      "count": 306705,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 4718304,
+      "componentType": 5126,
+      "count": 45867,
+      "max": [
+        82.06661224365234,
+        600.8327026367188,
+        127.79920196533203
+      ],
+      "min": [
+        -320.032470703125,
+        414.3561706542969,
+        -120.86395263671875
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 5268708,
+      "componentType": 5126,
+      "count": 45867,
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -0.9999352097511292,
+        -0.9999544620513916,
+        -0.9999962449073792
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 3781692,
+      "componentType": 5125,
+      "count": 96441,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "Thunk3D scanner (https://sketchfab.com/Diana123456)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/horse-sculpture-fa2387b422f642e0ab6d45bbd2226f5c",
+      "title": "Horse Sculpture"
+    },
+    "generator": "Sketchfab-12.68.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 4167456,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 5819112,
+      "byteOffset": 4167456,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 9986568,
+      "uri": "scene.bin"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "material_0",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.8748945657023758,
+          0.7546269719926244,
+          0.1801769833917221,
+          1.0
+        ],
+        "metallicFactor": 0.9054552316804088,
+        "roughnessFactor": 0.48983017437916004
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Object_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0
+          },
+          "indices": 2,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Object_1",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 4,
+            "POSITION": 3
+          },
+          "indices": 5,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Object_2",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 7,
+            "POSITION": 6
+          },
+          "indices": 8,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Object_3",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 10,
+            "POSITION": 9
+          },
+          "indices": 11,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        0.08436963707208633,
+        0.9825452566146851,
+        0.16579073667526267,
+        0.0,
+        -0.007169643882662058,
+        0.16697826981544517,
+        -0.9859344959259033,
+        0.0,
+        -0.9964087605476379,
+        0.08199427276849747,
+        0.021132394671440142,
+        0.0,
+        -101.63629150390625,
+        35.85355758666992,
+        12.534905433654792,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "name": "horse sculpture.OBJ.cleaner.materialmerger.gles"
+    },
+    {
+      "mesh": 0,
+      "name": "Object_2"
+    },
+    {
+      "mesh": 1,
+      "name": "Object_3"
+    },
+    {
+      "mesh": 2,
+      "name": "Object_4"
+    },
+    {
+      "mesh": 3,
+      "name": "Object_5"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}

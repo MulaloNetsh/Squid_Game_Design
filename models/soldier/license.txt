@@ -1,0 +1,11 @@
+Model Information:
+* title:	Squid game - guards
+* source:	https://sketchfab.com/3d-models/squid-game-guards-148201371444413d9545409c4714271a
+* author:	Gianmarco (https://sketchfab.com/GianmArt)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Squid game - guards" (https://sketchfab.com/3d-models/squid-game-guards-148201371444413d9545409c4714271a) by Gianmarco (https://sketchfab.com/GianmArt) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
