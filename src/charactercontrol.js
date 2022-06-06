@@ -43,10 +43,12 @@ class BasicCharacterControllerProxy {
       loader.setPath('../models/player/');
       loader.load('Player.fbx', (fbx) => {
         fbx.scale.setScalar(7);
-        fbx.rotation.set(0, 60, 0);
-        fbx.position.set(60, -40, 250)
+        fbx.rotation.set(0, 3.5, 0);
+        fbx.position.set(0, -40, 250);
+        fbx.lookAt(0,-40,-250);
         fbx.traverse(c => {
           c.castShadow = true;
+          c.receiveShadow=true;
         });
   
         this._target = fbx;

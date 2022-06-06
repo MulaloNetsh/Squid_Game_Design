@@ -17,23 +17,24 @@ body {
         rgba(148, 48, 48, 0.2),
         rgba(167, 67, 67, 0.4)
     ),
-    url(lose.png) center no-repeat;
+    url(./lose.png) center no-repeat;
     background-size: cover;
     overflow: relative;
     display: flex;
     justify-content: start;
-    align-items: center;
+    align-items: top;
 }
 
 
 .menu{
     color: #fff;
     margin-left: 4em;
+    margin-top: 10em;
     text-transform: uppercase;
 }
 
 .menu h1{
-    font-size: 4em;
+    font-size: 8em;
     letter-spacing: 30px;
     display: block;
     margin-bottom: 0.5em;
@@ -41,8 +42,8 @@ body {
 
 .menu h3{
     font-weight: 300;
-    font-size: 2.5em;
-    text-align: center;
+    font-size: 8em;
+    text-align: top;
     letter-spacing: 10px;
     position: relative;
 }
@@ -50,8 +51,8 @@ body {
 .menu h3::before,
 .menu h3::after{
     content: "";
-    position: absolute;
-    top: 50%;
+    position: relative;
+    top: 30%;
     transform: translateY(-50%);
     background: #ffff;
     width: 3em;
@@ -72,11 +73,12 @@ body {
 }
 
 .menu li{
-    margin: 1em 0;
+    margin: 4em 0;
 }
 
 .menu li a{
     text-decoration: none;
+    font-size: 3em;
     color: #fff;
     font-weight: 700;
 }
