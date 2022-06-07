@@ -19,6 +19,8 @@ let flow;
 const curveHandles = [];
 let text = document.querySelector('.text');
 const startBtn = document.querySelector('.start-btn');
+const soundOnbtn = document.querySelector('.soundON');
+const soundOffbtn = document.querySelector('.soundOFF');
 class Level2 {
   constructor() {
 
