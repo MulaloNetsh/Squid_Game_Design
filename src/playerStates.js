@@ -208,10 +208,10 @@ class State {
       const { previousState } = player.stateMachine;
       const previousAnimation = player.animations.get(previousState.id);
   
-      deadState.enabled = true;
+      deadState.enabled = false;
       deadState.crossFadeFrom(previousAnimation);
       deadState.setLoop(THREE.LoopOnce);
-      deadState.clampWhenFinished = true;
+      deadState.clampWhenFinished = false;     
       player.velocity = new Vector3();
     }
   

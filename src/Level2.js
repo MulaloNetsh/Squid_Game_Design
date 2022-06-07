@@ -32,7 +32,7 @@ class Level2 {
       antialias: true,
     });
     this.dollState = new Doll('idle');
-
+    soundManager.loadSounds();
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -48,11 +48,11 @@ class Level2 {
     }, false);
 
     soundOnbtn.addEventListener('click', () => {
-      soundManager.backgroundLevel2Song.pause();
-      soundManager.backgroundLevel2Song.play();
+      soundManager.backgroundSong.pause();
+      soundManager.backgroundSong.play();
     })
     soundOffbtn.addEventListener('click', () => {
-      soundManager.backgroundLevel2Song.pause();
+      soundManager.backgroundSong.pause();
     })
 
     const fov = 60;

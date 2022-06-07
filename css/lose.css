@@ -34,7 +34,7 @@ body {
 }
 
 .menu h1{
-    font-size: 8em;
+    font-size: 5em;
     letter-spacing: 30px;
     display: block;
     margin-bottom: 0.5em;
@@ -73,7 +73,7 @@ body {
 }
 
 .menu li{
-    margin: 4em 0;
+    margin: 3em 0;
 }
 
 .menu li a{

@@ -6,10 +6,11 @@ class SoundManager {
   }
 
   async loadSounds() {
-    const [backgroundSong, greenLightSong,backgroundLevel2Song] = await Promise.all([
+    const [backgroundSong, greenLightSong,backgroundLevel2Song,backgroundLevel3Song] = await Promise.all([
       this.loadSound('../sounds/background.mp3'),
       this.loadSound('../sounds/greenLight.mp3'),
       this.loadSound('../sounds/backgroundLevel2.mp3'),
+      this.loadSound('../sounds/level3.mp3')
     ]);
 
     this.backgroundSong = backgroundSong;
@@ -21,6 +22,9 @@ class SoundManager {
     this.backgroundLevel2Song = backgroundLevel2Song;
     this.backgroundLevel2Song.setVolume(1);
     this.backgroundLevel2Song.setLoop(true);
+    this.backgroundLevel3Song = backgroundLevel3Song;
+    this.backgroundLevel3Song.setVolume(1);
+    this.backgroundLevel3Song.setLoop(true);
     return Promise.resolve();
   }
 
