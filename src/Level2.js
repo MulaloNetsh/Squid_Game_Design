@@ -48,11 +48,11 @@ class Level2 {
     }, false);
 
     soundOnbtn.addEventListener('click', () => {
-      soundManager.backgroundSong.pause();
-      soundManager.backgroundSong.play();
+      soundManager.backgroundLevel2Song.pause();
+      soundManager.backgroundLevel2Song.play();
     })
     soundOffbtn.addEventListener('click', () => {
-      soundManager.backgroundSong.pause();
+      soundManager.backgroundLevel2Song.pause();
     })
 
     const fov = 60;
