@@ -6,6 +6,7 @@ import { ThirdPersonCamera } from './thirdpersoncamera.js'
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { Doll } from './doll.js'
 import { soundManager } from './soundManager.js';
+import { ReinhardToneMapping } from '../modules/three.module.js';
 let insetWidth, insetHeight;
 let timeLeft;
 let dollLight;
@@ -54,7 +55,7 @@ class Level1 {
     });
     this.dollState = new Doll('idle');
     soundManager.loadSounds();
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.outputEncoding = THREE.sRGBEncoding; //render convert the final color value in the fragment shaders from linear to sRGB color space
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -69,11 +70,12 @@ class Level1 {
         OnWindowResize();
     }, false);
 
-
+    //if soundOn button is click the sound background sound is played
     soundOnbtn.addEventListener('click', () => {
       soundManager.backgroundSong.pause();
       soundManager.backgroundSong.play();
     })
+    //if soundOff button is click the sound background sound is switched off
     soundOffbtn.addEventListener('click', () => {
       soundManager.backgroundSong.pause();
     })
@@ -88,10 +90,11 @@ class Level1 {
     this.cameraTop = new THREE.PerspectiveCamera(45, 60, 2, 1000);
     this.cameraTop.position.set(30, 250, 500);
 
-
+    //adds both camera to the scene
     this.scene.add(this.camera);
     this.scene.add(this.cameraTop);
 
+    //add skybox jpg images on xn,xp,yn,yp,zn,zp
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
       '../skybox1/posx.jpg',
@@ -103,6 +106,8 @@ class Level1 {
     ]);
     this.scene.background = texture;
 
+    //set new OrbitControls(creates camera control)
+    //set the vector of the topCamera(the one on the top right corner)
     this.controls = new OrbitControls(
       this.cameraTop, this.renderer.domElement);
     this.controls.target.set(0, 100, -100);
@@ -113,6 +118,8 @@ class Level1 {
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
 
+    //white spotlight shine on the doll
+    //cast dynamic shadow
     dollLight = new THREE.SpotLight(0xff0000, 4);
     dollLight.castShadow = true;
     dollLight.shadow.bias = -0.0001;
@@ -138,6 +145,7 @@ class Level1 {
     this.scene.add(slight);
 
     //light shining directly onto ground
+    //set it position, shines at 0.7 intensity from it position
     var glight = new THREE.DirectionalLight(0xffffff, 0.5);
     glight.position.set(0, 200, 0);
     this.scene.add(glight);
@@ -148,17 +156,20 @@ class Level1 {
     this.scene.add(flight);
 
     //light shining onto right wall
+    //set it position, shines at 0.7 intensity from it position
     var rlight = new THREE.DirectionalLight(0xffffff, 0.7);
     rlight.position.set(-250, 0, 0);
     this.scene.add(rlight);
 
     //light shining onto left wall
+    //set it position, shines at 0.7 intensity from it position
     var llight = new THREE.DirectionalLight(0xffffff, 0.7);
     llight.position.set(250, 0, 0);
     this.scene.add(llight);
 
+    //add fog of color white 
     this.scene.fog = new THREE.Fog(0x000000, 0.015, 1);
-
+   
     this.addGround();
     this.addWalls();
     this.addCheckpointLine();
@@ -304,12 +315,16 @@ class Level1 {
     return pole;
   }
   buildStreetLightBulb() {
-    var pointLight = new THREE.PointLight(0xFFA500, 0.03);
-    pointLight.add(new THREE.Mesh(new THREE.SphereGeometry(2, 4, 4), new THREE.MeshPhysicalMaterial({
-      roughness: 0,
-      transmission: 1,
-      thickness: 2
-    })));
+    var pointLight = new THREE.PointLight(0xffffff, 0.02);
+    pointLight.add(
+      new THREE.Mesh(new THREE.SphereGeometry(2,4,8), 
+      new THREE.MeshPhongMaterial({
+        color: 0x000000,
+        specular:0x666666,
+        emissive: 0xFF8C00,
+        shininess: 10,
+        opacity:0.9,
+        transparent: true})))
     return pointLight;
   }
 
@@ -339,6 +354,9 @@ class Level1 {
   }
 
   async loadSoldierModel(x, y, z) {
+    //loads the soldier model to the scene
+    //adds its shadow
+    //adds set it position and scale it,then adds on the scene
     const loader = new GLTFLoader();
     await loader.load("../models/soldier/scene.gltf", (gltf) => {
       gltf.scene.traverse(c => {
@@ -370,6 +388,7 @@ class Level1 {
     }, 2000);
   }
   async lookBackward() {
+    //rotate the doll to look backward and set the doll stae to "green"
     gsap.to(this.doll.rotation, { y: -3.15, duration: 2 });
     await this.delay(500);
     this.dollState.setState('green');
@@ -377,6 +396,7 @@ class Level1 {
   }
 
   async lookForward() {
+    //rotate the doll to look forward and set the doll stae to "red"
     gsap.to(this.doll.rotation, { y: 0, duration: 2 })
     await this.delay(1300);
     this.dollState.setState('red');
