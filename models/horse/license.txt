@@ -1,0 +1,11 @@
+Model Information:
+* title:	Horse Sculpture
+* source:	https://sketchfab.com/3d-models/horse-sculpture-fa2387b422f642e0ab6d45bbd2226f5c
+* author:	Thunk3D scanner (https://sketchfab.com/Diana123456)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Horse Sculpture" (https://sketchfab.com/3d-models/horse-sculpture-fa2387b422f642e0ab6d45bbd2226f5c) by Thunk3D scanner (https://sketchfab.com/Diana123456) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -1,0 +1,313 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 99,
+      "max": [
+        0.025291012600064278,
+        0.02529103495180607,
+        0.7729782462120056
+      ],
+      "min": [
+        -0.025291042402386665,
+        -0.02529105730354786,
+        -0.7729775309562683
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 1188,
+      "componentType": 5126,
+      "count": 99,
+      "max": [
+        1.0,
+        1.0,
+        0.6387905478477478
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -0.6387905478477478
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 99,
+      "max": [
+        0.999476432800293,
+        0.9999254941940308
+      ],
+      "min": [
+        0.0019800662994384766,
+        7.456541061401367e-05
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 384,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 2376,
+      "componentType": 5126,
+      "count": 514,
+      "max": [
+        0.21089456975460052,
+        0.21089470386505127,
+        0.8217703700065613
+      ],
+      "min": [
+        -0.21089477837085724,
+        -0.21089497208595276,
+        -0.821769654750824
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 8544,
+      "componentType": 5126,
+      "count": 514,
+      "max": [
+        0.799197256565094,
+        0.799197256565094,
+        1.0
+      ],
+      "min": [
+        -0.799197256565094,
+        -0.799197256565094,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 792,
+      "componentType": 5126,
+      "count": 514,
+      "max": [
+        0.9592815041542053,
+        0.48766782879829407
+      ],
+      "min": [
+        0.0001352683757431805,
+        0.0001352683757431805
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 1536,
+      "componentType": 5125,
+      "count": 2496,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "ChanopsTg (https://sketchfab.com/ChanopsTg)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/dance-pole-23518e5a8e884a218d85cb32ff935ea6",
+      "title": "Dance Pole"
+    },
+    "generator": "Sketchfab-12.67.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 11520,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 4904,
+      "byteOffset": 11520,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 14712,
+      "byteOffset": 16424,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 31136,
+      "uri": "scene.bin"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "pole",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.8,
+          0.8,
+          0.8,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8040408205773457
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "stands",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0472077,
+          0.0472077,
+          0.0472077,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9894440373738583
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Cylinder_pole_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Cylinder_stands_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 5,
+            "POSITION": 4,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 1,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        -0.014970661140978336,
+        4.2408429927509125e-18,
+        4.708281534372319e-34,
+        0.0,
+        7.305049328851855e-34,
+        9.166884542358594e-19,
+        0.014970661140978336,
+        0.0,
+        4.2408429927509125e-18,
+        0.014970661140978336,
+        -9.166884542358594e-19,
+        0.0,
+        3.154219484713394e-06,
+        1.2510176186675421e-20,
+        -5.634082481265068e-05,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "f6267499c4384b51a321ba1e87d4d7b1.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4,
+        5
+      ],
+      "matrix": [
+        100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.629206793918314e-05,
+        -99.99999999999868,
+        0.0,
+        0.0,
+        99.99999999999868,
+        -1.629206793918314e-05,
+        0.0,
+        5.302395948092453e-06,
+        83.01615142822266,
+        -3.18956736009568e-05,
+        1.0
+      ],
+      "name": "Cylinder"
+    },
+    {
+      "mesh": 0,
+      "name": "Cylinder_pole_0"
+    },
+    {
+      "mesh": 1,
+      "name": "Cylinder_stands_0"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ]
+}

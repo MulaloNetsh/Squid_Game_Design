@@ -1,723 +1,260 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
-import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
+import { BasicCharacterController } from './charactercontrol.js'
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
+import { Reflector } from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/objects/Reflector.js';
+import { ThirdPersonCamera } from './thirdpersoncamera.js'
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
+import { Doll } from './doll.js'
+import { soundManager } from './soundManager.js';
 
+
+const loseMusic = new Audio('../sounds/gunshot.mp3')//played when a player loses
 let insetWidth, insetHeight;
-var isPlay=false;
-let dollState="forward";
-let playerState="idle";
-let gameState="play";
-let text = document.querySelector(".text");
-class BasicCharacterControllerProxy {
-  constructor(animations) {
-    this._animations = animations;
-  }
+let timeLeft;
+let dollLight;
+let text = document.querySelector('.text');
+const startBtn = document.querySelector('.start-btn');
+const soundOnbtn = document.querySelector('.soundON');
+const soundOffbtn = document.querySelector('.soundOFF');
+let uniforms = {};
+uniforms.colorA = { type: 'vec3', value: new THREE.Color(0x98a3d4) }
+uniforms.colorB = { type: 'vec3', value: new THREE.Color(0x3690e3) }
 
-  get animations() {
-    return this._animations;
-  }
-};
+//custom shader, used to colour a geometry with two different colours and blend them together
+function vertexShader() {
+  return `
+    varying vec3 vUv; 
 
+    void main() {
+      vUv = position; 
 
-class BasicCharacterController {
-  constructor(params) {
-    this._Init(params);
-  }
-
-  _Init(params) {
-    this._params = params;
-    this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
-    this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
-    this._velocity = new THREE.Vector3(0, 0, 0);
-    this._position = new THREE.Vector3();
-
-    this._animations = {};
-    this._input = new BasicCharacterControllerInput();
-    this._stateMachine = new CharacterFSM(
-      new BasicCharacterControllerProxy(this._animations));
-
-    this._LoadModels();
-  }
-
-  _LoadModels() {
-    const loader = new FBXLoader();
-    loader.setPath('./models/player/');
-    loader.load('Player.fbx', (fbx) => {
-      fbx.scale.setScalar(7);
-      fbx.rotation.set(0, 60, 0);
-      fbx.position.set(5, 0, 250)
-      fbx.traverse(c => {
-        c.castShadow = true;
-      });
-
-      this._target = fbx;
-      this._params.scene.add(this._target);
-
-      this._mixer = new THREE.AnimationMixer(this._target);
-
-      this._manager = new THREE.LoadingManager();
-      this._manager.onLoad = () => {
-        this._stateMachine.SetState('idle');
-      };
-
-      const _OnLoad = (animName, anim) => {
-        const clip = anim.animations[0];
-        const action = this._mixer.clipAction(clip);
-
-        this._animations[animName] = {
-          clip: clip,
-          action: action,
-        };
-      };
-
-      const loader = new FBXLoader(this._manager);
-      loader.setPath('./models/player/');
-      loader.load('Walking.fbx', (a) => { _OnLoad('walk', a); });
-      loader.load('Running.fbx', (a) => { _OnLoad('run', a); });
-      loader.load('Idle.fbx', (a) => { _OnLoad('idle', a); });
-      loader.load('Dancing.fbx', (a) => { _OnLoad('dance', a); });
-    });
-  }
-
-  get Position() {
-    return this._position;
-  }
-
-  get Rotation() {
-    if (!this._target) {
-      return new THREE.Quaternion();
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewPosition; 
     }
-    return this._target.quaternion;
-  }
+  `
+}
+function fragmentShader() {
+  return `
+      uniform vec3 colorA; 
+      uniform vec3 colorB; 
+      varying vec3 vUv;
 
-  Update(timeInSeconds) {
-    if (!this._stateMachine._currentState) {
-      return;
-    }
-
-    this._stateMachine.Update(timeInSeconds, this._input);
-
-    const velocity = this._velocity;
-    const frameDecceleration = new THREE.Vector3(
-      velocity.x * this._decceleration.x,
-      velocity.y * this._decceleration.y,
-      velocity.z * this._decceleration.z
-    );
-    frameDecceleration.multiplyScalar(timeInSeconds);
-    frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
-      Math.abs(frameDecceleration.z), Math.abs(velocity.z));
-
-    velocity.add(frameDecceleration);
-
-    const controlObject = this._target;
-    const _Q = new THREE.Quaternion();
-    const _A = new THREE.Vector3();
-    const _R = controlObject.quaternion.clone();
-
-    const acc = this._acceleration.clone();
-    if (this._input._keys.shift) {
-      acc.multiplyScalar(2.0);
-    }
-
-    if (this._stateMachine._currentState.Name == 'dance') {
-      acc.multiplyScalar(0.0);
-    }
-
-    if (this._input._keys.forward) {
-      velocity.z += acc.z * timeInSeconds;
-    }
-    if (this._input._keys.backward) {
-      velocity.z -= acc.z * timeInSeconds;
-    }
-    if (this._input._keys.left) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, 4.0 * Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-    if (this._input._keys.right) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, 4.0 * -Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-
-    controlObject.quaternion.copy(_R);
-
-    const oldPosition = new THREE.Vector3();
-    oldPosition.copy(controlObject.position);
-
-    const forward = new THREE.Vector3(0, 0, 1);
-    forward.applyQuaternion(controlObject.quaternion);
-    forward.normalize();
-
-    const sideways = new THREE.Vector3(1, 0, 0);
-    sideways.applyQuaternion(controlObject.quaternion);
-    sideways.normalize();
-
-    sideways.multiplyScalar(velocity.x * timeInSeconds);
-    forward.multiplyScalar(velocity.z * timeInSeconds);
-
-    controlObject.position.add(forward);
-    controlObject.position.add(sideways);
-
-    this._position.copy(controlObject.position);
-
-    if (this._mixer) {
-      this._mixer.update(timeInSeconds);
-    }
-  }
-};
-
-class BasicCharacterControllerInput {
-  constructor() {
-    this._Init();
-  }
-
-  _Init() {
-    this._keys = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-      space: false,
-      shift: false,
-    };
-    document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
-    document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
-
-  }
-
-  _onKeyDown(event) {
-    if(dollState=="forward" && playerState=="play")
-    {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
+      void main() {
+        gl_FragColor = vec4(mix(colorA, colorB, vUv.z), 1.0);
       }
-    }
-    if(playerState=="idle")
-    {
-      return
-    }
-    switch (event.keyCode) {
-      case 87: // w
-        this._keys.forward = true;
-        break;
-      case 65: // a
-        this._keys.left = true;
-        break;
-      case 83: // s
-        this._keys.backward = true;
-        break;
-      case 68: // d
-        this._keys.right = true;
-        break;
-      case 32: // SPACE
-        this._keys.space = true;
-        break;
-      case 16: // SHIFT
-        this._keys.shift = true;
-        break;
-    }
-    
-  }
-
-  _onKeyUp(event) {
-    if(dollState=="forward" && playerState=="play")
-    {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
-      }
-    }
-    if(playerState=="idle")
-    {
-      return
-    }
-    switch (event.keyCode) {
-      case 87: // w
-        this._keys.forward = false;
-        break;
-      case 65: // a
-        this._keys.left = false;
-        break;
-      case 83: // s
-        this._keys.backward = false;
-        break;
-      case 68: // d
-        this._keys.right = false;
-        break;
-      case 32: // SPACE
-        this._keys.space = false;
-        break;
-      case 16: // SHIFT
-        this._keys.shift = false;
-        break;
-    }
-    
-  }
-};
-
-
-class FiniteStateMachine {
-  constructor() {
-    this._states = {};
-    this._currentState = null;
-  }
-
-  _AddState(name, type) {
-    this._states[name] = type;
-  }
-
-  SetState(name) {
-    const prevState = this._currentState;
-
-    if (prevState) {
-      if (prevState.Name == name) {
-        return;
-      }
-      prevState.Exit();
-    }
-
-    const state = new this._states[name](this);
-
-    this._currentState = state;
-    state.Enter(prevState);
-  }
-
-  Update(timeElapsed, input) {
-    if (this._currentState) {
-      this._currentState.Update(timeElapsed, input);
-    }
-  }
-};
-
-
-class CharacterFSM extends FiniteStateMachine {
-  constructor(proxy) {
-    super();
-    this._proxy = proxy;
-    this._Init();
-  }
-
-  _Init() {
-    this._AddState('idle', IdleState);
-    this._AddState('walk', WalkState);
-    this._AddState('run', RunState);
-    this._AddState('dance', DanceState);
-  }
-};
-
-
-class State {
-  constructor(parent) {
-    this._parent = parent;
-  }
-
-  Enter() { }
-  Exit() { }
-  Update() { }
-};
-
-
-class DanceState extends State {
-  constructor(parent) {
-    super(parent);
-
-    this._FinishedCallback = () => {
-      this._Finished();
-    }
-  }
-
-  get Name() {
-    return 'dance';
-  }
-
-  Enter(prevState) {
-    const curAction = this._parent._proxy._animations['dance'].action;
-    const mixer = curAction.getMixer();
-    mixer.addEventListener('finished', this._FinishedCallback);
-
-    if (prevState) {
-      const prevAction = this._parent._proxy._animations[prevState.Name].action;
-
-      curAction.reset();
-      curAction.setLoop(THREE.LoopOnce, 1);
-      curAction.clampWhenFinished = true;
-      curAction.crossFadeFrom(prevAction, 0.2, true);
-      curAction.play();
-    } else {
-      curAction.play();
-    }
-  }
-
-  _Finished() {
-    this._Cleanup();
-    this._parent.SetState('idle');
-  }
-
-  _Cleanup() {
-    const action = this._parent._proxy._animations['dance'].action;
-
-    action.getMixer().removeEventListener('finished', this._CleanupCallback);
-  }
-
-  Exit() {
-    this._Cleanup();
-  }
-
-  Update(_) {
-  }
-};
-
-
-class WalkState extends State {
-  constructor(parent) {
-    super(parent);
-  }
-
-  get Name() {
-    return 'walk';
-  }
-
-  Enter(prevState) {
-    const curAction = this._parent._proxy._animations['walk'].action;
-    if (prevState) {
-      const prevAction = this._parent._proxy._animations[prevState.Name].action;
-
-      curAction.enabled = true;
-
-      if (prevState.Name == 'run') {
-        const ratio = curAction.getClip().duration / prevAction.getClip().duration;
-        curAction.time = prevAction.time * ratio;
-      } else {
-        curAction.time = 0.0;
-        curAction.setEffectiveTimeScale(1.0);
-        curAction.setEffectiveWeight(1.0);
-      }
-
-      curAction.crossFadeFrom(prevAction, 0.5, true);
-      curAction.play();
-    } else {
-      curAction.play();
-    }
-  }
-
-  Exit() {
-  }
-
-  Update(timeElapsed, input) {
-    if (input._keys.forward || input._keys.backward) {
-      if (input._keys.shift) {
-        this._parent.SetState('run');
-      }
-      return;
-    }
-
-    this._parent.SetState('idle');
-  }
-};
-
-
-class RunState extends State {
-  constructor(parent) {
-    super(parent);
-  }
-
-  get Name() {
-    return 'run';
-  }
-
-  Enter(prevState) {
-    const curAction = this._parent._proxy._animations['run'].action;
-    if (prevState) {
-      const prevAction = this._parent._proxy._animations[prevState.Name].action;
-
-      curAction.enabled = true;
-
-      if (prevState.Name == 'walk') {
-        const ratio = curAction.getClip().duration / prevAction.getClip().duration;
-        curAction.time = prevAction.time * ratio;
-      } else {
-        curAction.time = 0.0;
-        curAction.setEffectiveTimeScale(1.0);
-        curAction.setEffectiveWeight(1.0);
-      }
-
-      curAction.crossFadeFrom(prevAction, 0.5, true);
-      curAction.play();
-    } else {
-      curAction.play();
-    }
-  }
-
-  Exit() {
-  }
-
-  Update(timeElapsed, input) {
-    if (input._keys.forward || input._keys.backward) {
-      if (!input._keys.shift) {
-        this._parent.SetState('walk');
-      }
-      return;
-    }
-
-    this._parent.SetState('idle');
-  }
-};
-
-
-class IdleState extends State {
-  constructor(parent) {
-    super(parent);
-  }
-
-  get Name() {
-    return 'idle';
-  }
-
-  Enter(prevState) {
-    const idleAction = this._parent._proxy._animations['idle'].action;
-    if (prevState) {
-      const prevAction = this._parent._proxy._animations[prevState.Name].action;
-      idleAction.time = 0.0;
-      idleAction.enabled = true;
-      idleAction.setEffectiveTimeScale(1.0);
-      idleAction.setEffectiveWeight(1.0);
-      idleAction.crossFadeFrom(prevAction, 0.5, true);
-      idleAction.play();
-    } else {
-      idleAction.play();
-    }
-  }
-
-  Exit() {
-  }
-
-  Update(_, input) {
-    if (input._keys.forward || input._keys.backward) {
-      this._parent.SetState('walk');
-    } else if (input._keys.space) {
-      this._parent.SetState('dance');
-    }
-  }
-};
-
-
-class ThirdPersonCamera {
-  constructor(params) {
-    this._params = params;
-    this._camera = params.camera;
-
-    this._currentPosition = new THREE.Vector3();
-    this._currentLookat = new THREE.Vector3();
-  }
-
-  _CalculateIdealOffset() {
-    const idealOffset = new THREE.Vector3(10, 15, -30);
-    idealOffset.applyQuaternion(this._params.target.Rotation);
-    idealOffset.add(this._params.target.Position);
-    return idealOffset;
-  }
-
-  _CalculateIdealLookat() {
-    const idealLookat = new THREE.Vector3(0, 10, 50);
-    idealLookat.applyQuaternion(this._params.target.Rotation);
-    idealLookat.add(this._params.target.Position);
-    return idealLookat;
-  }
-
-  Update(timeElapsed) {
-    const idealOffset = this._CalculateIdealOffset();
-    const idealLookat = this._CalculateIdealLookat();
-
-    // const t = 0.05;
-    // const t = 4.0 * timeElapsed;
-    const t = 1.0 - Math.pow(0.001, timeElapsed);
-
-    this._currentPosition.lerp(idealOffset, t);
-    this._currentLookat.lerp(idealLookat, t);
-
-    this._camera.position.copy(this._currentPosition);
-    this._camera.lookAt(this._currentLookat);
-  }
+  `
 }
 
 
-class ThirdPersonCameraDemo {
+class Level1 {
   constructor() {
-    this._Initialize();
+
+    this.Initialize();
   }
 
-  _Initialize() {
-    const startBtn = document.querySelector('.start-btn');
-
-    this._threejs = new THREE.WebGLRenderer({
+  Initialize() {
+    this.renderer = new THREE.WebGLRenderer({
       antialias: true,
     });
-    this._threejs.outputEncoding = THREE.sRGBEncoding;
-    this._threejs.shadowMap.enabled = true;
-    this._threejs.shadowMap.type = THREE.PCFSoftShadowMap;
-    this._threejs.setPixelRatio(window.devicePixelRatio);
-    this._threejs.setSize(window.innerWidth, window.innerHeight);
+    this.dollState = new Doll('idle');
+    soundManager.loadSounds();
 
-    document.body.appendChild(this._threejs.domElement);
+    //render convert the final color value in the fragment shaders from linear to sRGB color space
+    this.renderer.outputEncoding = THREE.sRGBEncoding; 
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
+    this.scene = new THREE.Scene();
+
+
+    document.body.appendChild(this.renderer.domElement);
     window.addEventListener('resize', () => {
-      this._OnWindowResize();
+      this.
+        OnWindowResize();
     }, false);
 
+    //if soundOn button is click the sound background sound is played
+    soundOnbtn.addEventListener('click', () => {
+      soundManager.backgroundSong.pause();
+      soundManager.backgroundSong.play();
+    })
+    //if soundOff button is click the sound background sound is switched off
+    soundOffbtn.addEventListener('click', () => {
+      soundManager.backgroundSong.pause();
+    })
     const fov = 60;
     const aspect = 1920 / 1080;
     const near = 1.0;
     const far = 1000.0;
-    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this._camera.position.set(100, -100, 0);
+    this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    this.camera.position.set(0, -100, 0);
+
+    //top view & Orbit Controls Camera
+    this.cameraTop = new THREE.PerspectiveCamera(45, 60, 2, 1000);
+    this.cameraTop.position.set(30, 250, 500);
+
+    //adds both camera to the scene
+    this.scene.add(this.camera);
+    this.scene.add(this.cameraTop);
+
+    //add skybox jpg images on xn,xp,yn,yp,zn,zp
+    const loader = new THREE.CubeTextureLoader();
+    const texture = loader.load([
+      '../skybox1/posx.jpg',
+      '../skybox1/negx.jpg',
+      '../skybox1/posy.jpg',
+      '../skybox1/negy.jpg',
+      '../skybox1/posz.jpg',
+      '../skybox1/negz.jpg',
+    ]);
+    this.scene.background = texture;
+
+    //set new OrbitControls(creates camera control)
+    //set the vector of the topCamera(the one on the top right corner)
+    this.controls = new OrbitControls(
+      this.cameraTop, this.renderer.domElement);
+    this.controls.target.set(0, 100, -100);
+    this.controls.update();
 
 
-    this.cameraTop = new THREE.PerspectiveCamera(80, aspect, near, far);
-    this.cameraTop.position.set(10, 120, 80);
-    this.cameraTop.lookAt(15, 100, 40);
-    this._camera.add(this.cameraTop);
+    //adding ambient light to the scene
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
 
+    //white spotlight shine on the doll
+    //cast shadow on doll
+    dollLight = new THREE.SpotLight(0xff0000, 4);
+    dollLight.castShadow = true;
+    dollLight.shadow.bias = -0.0001;
+    dollLight.distance = 250;
+    dollLight.shadow.mapSize.width = 1024 * 4;
+    dollLight.shadow.mapSize.height = 1024 * 4;
+    dollLight.position.set(0, 200, -240);
+    this.scene.add(dollLight);
 
-    this._scene = new THREE.Scene();
-    const bgdloader = new THREE.TextureLoader();
-    const bgTexture = bgdloader.load('./images/bground.jpg');
-    this._scene.background = bgTexture;
+    //directional light from behind doll 
+    var slight = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+    slight.position.set(0, 150, -200);
+    slight.castShadow = true;
+    slight.shadow.bias = -0.001;
+    slight.shadow.mapSize.width = 4096;
+    slight.shadow.mapSize.height = 4096;
+    slight.shadow.camera.near = 1.0;
+    slight.shadow.camera.far = 1000;
+    slight.shadow.camera.left = 400;
+    slight.shadow.camera.right = -400;
+    slight.shadow.camera.top = 300;
+    slight.shadow.camera.bottom = -300;
+    this.scene.add(slight);
 
-    this._scene.add(this._camera);
-    let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
-    light.position.set(-100, 100, 100);
-    light.target.position.set(0, 0, 0);
-    light.castShadow = true;
-    light.shadow.bias = -0.001;
-    light.shadow.mapSize.width = 4096;
-    light.shadow.mapSize.height = 4096;
-    light.shadow.camera.near = 0.1;
-    light.shadow.camera.far = 500.0;
-    light.shadow.camera.near = 0.5;
-    light.shadow.camera.far = 500.0;
-    light.shadow.camera.left = 50;
-    light.shadow.camera.right = -50;
-    light.shadow.camera.top = 50;
-    light.shadow.camera.bottom = -50;
-    this._scene.add(light);
+    //light shining directly onto ground
+    //set it position, shines at 0.7 intensity from it position
+    var glight = new THREE.DirectionalLight(0xffffff, 0.5);
+    glight.position.set(0, 200, 0);
+    this.scene.add(glight);
 
-    light = new THREE.AmbientLight(0xFFFFFF, 0.25);
-    this._scene.add(light);
+    //light shining onto front wall
+    var flight = new THREE.DirectionalLight(0xffffff, 0.7);
+    flight.position.set(0, 0, 300);
+    this.scene.add(flight);
 
-    const music = new Audio('./music/Squid_Game_Theme.mp3')
-    music.loop = true;
+    //light shining onto right wall
+    //set it position, shines at 0.7 intensity from it position
+    var rlight = new THREE.DirectionalLight(0xffffff, 0.7);
+    rlight.position.set(-250, 0, 0);
+    this.scene.add(rlight);
 
+    //light shining onto left wall
+    //set it position, shines at 0.7 intensity from it position
+    var llight = new THREE.DirectionalLight(0xffffff, 0.7);
+    llight.position.set(250, 0, 0);
+    this.scene.add(llight);
+
+    //add black fog to scene to darken it completely
+    //then gradually reduce it till the scene is clear
+    // then the timer begins
+    this.scene.fog = new THREE.Fog(0x000000, 0.015, 1);
+   
     this.addGround();
+    this.addWalls();
     this.addCheckpointLine();
     this.addTree();
-    this.addSideWalls();
-    this.addFrontWall();
-    this.addBackWall();
-    //add Doll
-    this.doll = this.loadDoll();
+    this.LoadAnimatedModel();
+    this.loadSoldierModel(-40, -38, -230);
+    this.loadSoldierModel(40, -38, -230);
+    this.addStreetLights();
 
-    if(gameState=="play")
-    {
-    setTimeout(() => {
-      startBtn.innerText = "start"
-      
-    }, 4000);
 
-    setTimeout(() => {
-      startBtn.addEventListener('click', () => {
-        if (startBtn.innerText == "START") {
-          document.querySelector('.modal').style.display = "none"
-        }
-        music.play();
-        this.timer();
-      })
-    }, 1000);
-    }
-    this._LoadAnimatedModel();
-    this._OnWindowResize();
-    this._mixers = [];
-    this._previousRAF = null;
+    this.mixers = [];
+    this.previousRAF = null;
+    this.animate();
 
-    this._RAF();
+    
 
   }
 
   addGround() {
-    const groundGeometry = new THREE.PlaneGeometry(500, 600);
-    const groundTexture = new THREE.TextureLoader().load(
-      './images/ground.jpg',
+    var groundTexture = new THREE.TextureLoader().load('../images/level1Ground.jpg');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(10, 30);
+
+    var groundMaterial = new THREE.MeshStandardMaterial({ map: groundTexture });
+
+    var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(500, 600), groundMaterial);
+    mesh.position.y = -40;
+    mesh.rotation.x = - Math.PI / 2;
+    mesh.receiveShadow = true;
+    this.scene.add(mesh);
+  }
+
+  addWalls() {
+    this.addFrontWall();
+    this.addBackWall();
+    this.addLeftWall();
+    this.addRightWall();
+  }
+  buildWall(length) {
+    const frontWallTexture = new THREE.TextureLoader().load(
+      '../images/SideWalls.jpg',
     );
-    groundTexture.wrapS = THREE.RepeatWrapping;
-    groundTexture.wrapT = THREE.RepeatWrapping;
-    const groundMaterial = new THREE.MeshLambertMaterial({
-      map: groundTexture,
+    const material = new THREE.MeshLambertMaterial({
+      map: frontWallTexture,
     });
-    const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
-    groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.position.y = -10;
-    groundMesh.receiveShadow = true;
-    this._scene.add(groundMesh);
+
+    const wall = new THREE.Mesh(
+      new THREE.BoxGeometry(length, 100, 2),
+      material,
+    );
+    wall.receiveShadow = true;
+    return wall;
   }
   addFrontWall() {
-    const frontWallTexture = new THREE.TextureLoader().load(
-      './images/SideWalls.jpg',
-    );
-    const frontWallMaterial = new THREE.MeshLambertMaterial({
-      map: frontWallTexture,
-    });
-
-    const frontWall = new THREE.Mesh(
-      new THREE.BoxGeometry(500, 100, 2),
-      frontWallMaterial,
-    );
-    this._scene.add(frontWall);
-    frontWall.position.y += 5;
-    frontWall.position.z = -300;
+    const wall = this.buildWall(500);
+    wall.position.y += 5;
+    wall.position.z = -300;
+    this.scene.add(wall);
   }
   addBackWall() {
-    const frontWallTexture = new THREE.TextureLoader().load(
-      './images/SideWalls.jpg',
-    );
-    const frontWallMaterial = new THREE.MeshLambertMaterial({
-      map: frontWallTexture,
-    });
-
-    const frontWall = new THREE.Mesh(
-      new THREE.BoxGeometry(500, 100, 2),
-      frontWallMaterial,
-    );
-    this._scene.add(frontWall);
-    frontWall.position.y += 5;
-    frontWall.position.z = 300;
+    const wall = this.buildWall(500);
+    wall.position.y += 5;
+    wall.position.z = 300;
+    this.scene.add(wall);
   }
-  addSideWalls() {
-    const sideWallsTexture = new THREE.TextureLoader().load(
-      './images/SideWalls.jpg',
-    );
-    const sideWallsMaterial = new THREE.MeshLambertMaterial({
-      map: sideWallsTexture,
-    });
-    const leftWall = new THREE.Mesh(
-      new THREE.BoxGeometry(600, 100, 2),
-      sideWallsMaterial,
-    );
-    leftWall.position.x = -250;
-    leftWall.position.y += 5;
-    leftWall.rotateY(Math.PI / 2);
-    this._scene.add(leftWall);
-
-    const rightWall = new THREE.Mesh(
-      new THREE.BoxGeometry(600, 100, 2),
-      sideWallsMaterial,
-    );
-    rightWall.position.x = 250;
-    rightWall.position.y += 5;
-    rightWall.rotateY(Math.PI / 2);
-    this._scene.add(rightWall);
+  addLeftWall() {
+    const wall = this.buildWall(600);
+    wall.position.x = -250;
+    wall.position.y += 5;
+    wall.rotateY(Math.PI / 2);
+    this.scene.add(wall);
+  }
+  addRightWall() {
+    const wall = this.buildWall(600);
+    wall.position.x = 250;
+    wall.position.y += 5;
+    wall.rotateY(Math.PI / 2);
+    this.scene.add(wall);
   }
 
   addTree() {
@@ -726,51 +263,152 @@ class ThirdPersonCameraDemo {
       gltf.scene.traverse(c => {
         c.castShadow = true;
       });
-      gltf.scene.position.set(0, -9, -290);
-      gltf.scene.scale.set(10, 10, 10);
-      this._scene.add(gltf.scene);
+      gltf.scene.position.set(0, -38, -250);
+      gltf.scene.scale.set(13, 13, 13);
+      this.scene.add(gltf.scene);
 
     })
   }
   addCheckpointLine() {
-    const material = new THREE.LineBasicMaterial({
-      color: 0xff0000
+    const mirrorBack1 = new Reflector(
+      new THREE.PlaneBufferGeometry(500, 4),
+      {
+        color: new THREE.Color(0x00ffff),
+        textureWidth: window.innerWidth * window.devicePixelRatio,
+        textureHeight: window.innerHeight * window.devicePixelRatio
+      }
+    )
+    mirrorBack1.position.y = -28;
+    mirrorBack1.position.z = -200;
+    this.scene.add(mirrorBack1);
+  }
+
+  LoadAnimatedModel() {
+    this.doll = this.loadDoll();
+    const params = {
+      camera: this.camera,
+      scene: this.scene,
+    }
+    this.playerControls = new BasicCharacterController(params);
+    this._thirdPersonCamera = new ThirdPersonCamera({
+      camera: this.camera,
+      target: this.playerControls,
     });
-
-    const points = [];
-    points.push(new THREE.Vector3(- 250, 0, -100));
-    points.push(new THREE.Vector3(0, 0, -100));
-    points.push(new THREE.Vector3(250, 0, -100));
-
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    const line = new THREE.Line(geometry, material);
-    line.scale.set(1, 1, 2);
-    line.position.y = -2;
-    this._scene.add(line);
+    this.gameLogic();
   }
   async loadDoll() {
     const loader = new GLTFLoader();
     await loader.load("../models/doll/scene.gltf", (gltf) => {
       gltf.scene.traverse(c => {
         c.castShadow = true;
+        c.receiveShadow = true;
       });
-      gltf.scene.position.set(0, 7.5, -250);
+      gltf.scene.position.set(0, -20, -230);
       gltf.scene.scale.set(4, 4, 4);
-      this._scene.add(gltf.scene);
+      this.scene.add(gltf.scene);
       this.doll = gltf.scene;
     })
-    return this.doll;
+  }
+  buildStreetPole() {
+    const geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
+    const material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      fragmentShader: fragmentShader(),
+      vertexShader: vertexShader(),
+    })
+    const pole = new THREE.Mesh(geometry, material);
+    pole.castShadow = true;
+    pole.scale.set(1, 2, 1);
+    return pole;
+  }
+  buildStreetLightBulb() {
+    var pointLight = new THREE.PointLight(0xffffff, 0.02);
+    pointLight.add(
+      new THREE.Mesh(new THREE.SphereGeometry(2,4,8), 
+      new THREE.MeshPhongMaterial({
+        color: 0x000000,
+        specular:0x666666,
+        emissive: 0xFF8C00,
+        shininess: 10,
+        opacity:0.9,
+        transparent: true})))
+    return pointLight;
   }
 
-  lookBackward() {
-    gsap.to(this.doll.rotation, { y: -3.15, duration: 2 })
-    setTimeout(() => dollState="back", 500)
+
+  buildStreetLight(x, z) {
+    const streetLight = new THREE.Group();
+    let pole = this.buildStreetPole()
+    let lightBulb = this.buildStreetLightBulb();
+    streetLight.add(pole);
+    lightBulb.position.set(0, 20, 0);
+    streetLight.add(lightBulb);
+    this.scene.add(streetLight);
+    streetLight.position.set(x, -20, z);
   }
-   lookForward() {
+
+  addStreetLights() {
+    let z = 250;
+    for (var i = 0; i < 10; i++) {
+      this.buildStreetLight(-200, z);
+      z = z - 50;
+    }
+    z = 250
+    for (var i = 0; i < 10; i++) {
+      this.buildStreetLight(200, z);
+      z = z - 50;
+    }
+  }
+
+  async loadSoldierModel(x, y, z) {
+    //loads the soldier model to the scene
+    //adds its shadow
+    //adds set it position and scale it,then adds on the scene
+    const loader = new GLTFLoader();
+    await loader.load("../models/soldier/scene.gltf", (gltf) => {
+      gltf.scene.traverse(c => {
+        c.castShadow = true;
+        c.receiveShadow = true;
+      });
+      gltf.scene.position.set(x, y, z);
+      gltf.scene.scale.set(13, 13, 13);
+      this.scene.add(gltf.scene);
+    });
+  }
+
+  gameLogic() {
+    setTimeout(() => {
+      startBtn.innerText = "start"
+
+    }, 15000);
+    setTimeout(() => {
+      startBtn.addEventListener('click', () => {
+        if (startBtn.innerText == "START") {
+          document.querySelector('.modal').style.display = "none";
+          const loadingScreen = document.querySelector('.loading-screen')
+          loadingScreen.classList.add('fade-out');
+          loadingScreen.addEventListener('transitionend', this.onTransitionEnd);
+          loadingScreen.style.display = "none";
+          this.timer();
+        }
+      })
+    }, 2000);
+  }
+  async lookBackward() {
+    //rotate the doll to look backward and set the doll stae to "green"
+    gsap.to(this.doll.rotation, { y: -3.15, duration: 2 });
+    await this.delay(500);
+    this.dollState.setState('green');
+    text.style.color = "#0f0";
+  }
+
+  async lookForward() {
+    //rotate the doll to look forward and set the doll stae to "red"
     gsap.to(this.doll.rotation, { y: 0, duration: 2 })
-    setTimeout(() => dollState="forward", 2000)
-    
+    await this.delay(1300);
+    this.dollState.setState('red');
+    text.style.color = '#f00';
+
   }
 
   async start() {
@@ -779,124 +417,118 @@ class ThirdPersonCameraDemo {
     this.lookForward();
     await this.delay((Math.random() * 1000) + 5000);
     this.start();
+  }
 
+  async timer() {
+    soundManager.backgroundSong.play();
+    await this.delay(5000)
+    text.innerText = "Starting in 5"
+    this.scene.fog.far = 10;
+    await this.delay(1000)
+    text.innerText = "Starting in 4"
+    this.scene.fog.far = 50;
+    await this.delay(1000)
+    text.innerText = "Starting in 3"
+    this.scene.fog.far = 100;
+    await this.delay(1000)
+    text.innerText = "Starting in 2"
+    this.scene.fog.far = 1000;
+    await this.delay(1000)
+    text.innerText = "Starting in 1"
+    this.scene.fog.far = 10000;
+    await this.delay(1000)
+    this.start();
+    for (let i = 120; i >= 0; i--) {
+      text.innerText = (i + " : Seconds Left");
+      timeLeft = i;
+      await this.delay(1000)
+    }
   }
 
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+  OnWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-  async timer() {
-    await this.delay(1000)
-    text.innerText = "Starting in 5"
-    await this.delay(1000)
-    text.innerText = "Starting in 4"
-    await this.delay(1000)
-    text.innerText = "Starting in 3"
-    await this.delay(1000)
-    text.innerText = "Starting in 2"
-    await this.delay(1000)
-    text.innerText = "Starting in 1"
-    await this.delay(1000)
-    this.start();
-    playerState="play";
-    for (let i = 120; i >= 0; i--) {
-      text.innerText = (i + " : Seconds Left");
-      await this.delay(1000)
-    }
-    if(text.innerText=="0 : Seconds Left")
-    {
-      if (confirm("You Lost! Restart?")) {
-        window.location.reload();
-      } else {
-        window.location.replace("./menu.html");
-      }
-    }
-
-  }
-  _LoadAnimatedModel() {
-    const params = {
-      camera: this._camera,
-      scene: this._scene,
-    }
-    this._controls = new BasicCharacterController(params);
-
-    this._thirdPersonCamera = new ThirdPersonCamera({
-      camera: this._camera,
-      target: this._controls,
-    });
-  }
-
-  _OnWindowResize() {
-    this._camera.aspect = window.innerWidth / window.innerHeight;
-    this._camera.updateProjectionMatrix();
-    this._threejs.setSize(window.innerWidth, window.innerHeight);
-
-    insetWidth = window.innerWidth / 4;
-    insetHeight = window.innerHeight / 4;
+    insetWidth = window.innerWidth / 3;
+    insetHeight = window.innerHeight / 3;
 
     this.cameraTop.aspect = insetWidth / insetHeight;
     this.cameraTop.updateProjectionMatrix();
   }
 
-
-  _RAF() {
+  async check() {
+    if (this.dollState.getState() == 'red' && (this.playerControls.State == 'walk' || this.playerControls.State == 'run' || this.playerControls.State == 'dance')) {
+      loseMusic.play();
+      await this.delay(500);
+      window.location.replace("../html/loseScreen.html");
+    }
+    if (timeLeft == 0 && this.playerControls._position.z > -200) {
+      loseMusic.play();
+      await this.delay(500);
+      window.location.replace("../html/loseScreen.html");
+      
+    }
+    if (this.timeLeft != 0 && this.playerControls._position.z <= -200) {
+      window.location.replace("../html/winScreen.html");
+    }
+  }
+  animate() {
     requestAnimationFrame((t) => {
-      if (this._previousRAF === null) {
-        this._previousRAF = t;
+      if (this.previousRAF === null) {
+        this.previousRAF = t;
       }
 
-      this._RAF();
+      this.animate();
 
-      this._threejs.setViewport(0, 0, window.innerWidth, window.innerHeight);
-      this._threejs.render(this._scene, this._camera);
-      this._Step(t - this._previousRAF);
-      this._previousRAF = t;
 
-      this._threejs.clearDepth();
-      this._threejs.setScissorTest(true);
+      this.check();
+      this.OnWindowResize();
+      this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+      this.renderer.render(this.scene, this.camera);
+      this.Step(t - this.previousRAF);
+      this.previousRAF = t;
 
-      this._threejs.setScissor(
+      this.renderer.clearDepth();
+      this.renderer.setScissorTest(true);
+
+      this.renderer.setScissor(
         window.innerWidth - insetWidth - 16,
         window.innerHeight - insetHeight - 16,
         insetWidth,
         insetHeight
       );
-      this._threejs.setViewport(
+      this.renderer.setViewport(
         window.innerWidth - insetWidth - 16,
         window.innerHeight - insetHeight - 16,
         insetWidth,
         insetHeight
       );
-      this._threejs.render(this._scene, this.cameraTop);
-      this._threejs.setScissorTest(false);
-
+      this.renderer.render(this.scene, this.cameraTop);
+      this.renderer.setScissorTest(false);
 
     });
   }
-
-  _Step(timeElapsed) {
+  Step(timeElapsed) {
     const timeElapsedS = timeElapsed * 0.001;
-    if (this._mixers) {
-      this._mixers.map(m => m.update(timeElapsedS));
+    if (this.mixers) {
+      this.mixers.map(m => m.update(timeElapsedS));
     }
 
-    if (this._controls) {
-      this._controls.Update(timeElapsedS);
+    if (this.playerControls) {
+      this.playerControls.Update(timeElapsedS);
     }
 
     this._thirdPersonCamera.Update(timeElapsedS);
   }
 }
-
-
-let _APP = null;
-
+let APP = null;
 window.addEventListener('DOMContentLoaded', () => {
-  _APP = new ThirdPersonCameraDemo();
+  APP = new Level1();
 });
-
-
 function _LerpOverFrames(frames, t) {
   const s = new THREE.Vector3(0, 0, 0);
   const e = new THREE.Vector3(100, 0, 0);
@@ -918,3 +550,4 @@ _TestLerp(0.01, 0.01);
 _TestLerp(1.0 / 100.0, 1.0 / 50.0);
 _TestLerp(1.0 - Math.pow(0.3, 1.0 / 100.0),
   1.0 - Math.pow(0.3, 1.0 / 50.0));
+

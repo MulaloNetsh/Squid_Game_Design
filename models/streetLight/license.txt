@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dance Pole
+* source:	https://sketchfab.com/3d-models/dance-pole-23518e5a8e884a218d85cb32ff935ea6
+* author:	ChanopsTg (https://sketchfab.com/ChanopsTg)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dance Pole" (https://sketchfab.com/3d-models/dance-pole-23518e5a8e884a218d85cb32ff935ea6) by ChanopsTg (https://sketchfab.com/ChanopsTg) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

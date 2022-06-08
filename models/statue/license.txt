@@ -1,0 +1,11 @@
+Model Information:
+* title:	Ibex Statue Scan - Berlin - Tierpark
+* source:	https://sketchfab.com/3d-models/ibex-statue-scan-berlin-tierpark-0f274384b28044e3a29fd87e4c765238
+* author:	Christian Rambow (https://sketchfab.com/art-3d.com)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Ibex Statue Scan - Berlin - Tierpark" (https://sketchfab.com/3d-models/ibex-statue-scan-berlin-tierpark-0f274384b28044e3a29fd87e4c765238) by Christian Rambow (https://sketchfab.com/art-3d.com) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
