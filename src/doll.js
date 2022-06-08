@@ -1,5 +1,4 @@
-import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
-
+//This class handles the states of the doll
 class Doll  
 {
   constructor(state) 

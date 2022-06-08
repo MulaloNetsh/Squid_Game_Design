@@ -1,4 +1,9 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
+
+
+//This is where the animations are assigned from the mixer. 
+//The states are Walk, Run, Dance, Idle.
+//This way we can easily allow the player to move between different states
 const PLAYER_STATES = {
   IDLE: 'IDLE',
   WALK: 'WALK',

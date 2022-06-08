@@ -91,7 +91,9 @@ class BasicCharacterControllerProxy {
       }
       return this._target.quaternion;
     }
-  
+  //returns players current state
+  //this is used to determine whether or not a player is moving 
+  //when the doll is facing them
     get State()
     {
       return this._stateMachine._currentState.Name;
@@ -197,10 +199,6 @@ class BasicCharacterControllerProxy {
     }
   
     _onKeyDown(event) {
-      //handle the case of when a player moves when the doll is facing them
-      // A dialog box is shown telling the loser they lost
-      // it also provides them with a chance to replay the level
-      // or exit to the main menu 
   
       switch (event.keyCode) {
         case 87: // w walk forward

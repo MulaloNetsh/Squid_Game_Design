@@ -6,7 +6,9 @@ import { ThirdPersonCamera } from './thirdpersoncamera.js'
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 import { Doll } from './doll.js'
 import { soundManager } from './soundManager.js';
-import { ReinhardToneMapping } from '../modules/three.module.js';
+
+
+const loseMusic = new Audio('../sounds/gunshot.mp3')//played when a player loses
 let insetWidth, insetHeight;
 let timeLeft;
 let dollLight;
@@ -18,6 +20,7 @@ let uniforms = {};
 uniforms.colorA = { type: 'vec3', value: new THREE.Color(0x98a3d4) }
 uniforms.colorB = { type: 'vec3', value: new THREE.Color(0x3690e3) }
 
+//custom shader, used to colour a geometry with two different colours and blend them together
 function vertexShader() {
   return `
     varying vec3 vUv; 
@@ -55,7 +58,9 @@ class Level1 {
     });
     this.dollState = new Doll('idle');
     soundManager.loadSounds();
-    this.renderer.outputEncoding = THREE.sRGBEncoding; //render convert the final color value in the fragment shaders from linear to sRGB color space
+
+    //render convert the final color value in the fragment shaders from linear to sRGB color space
+    this.renderer.outputEncoding = THREE.sRGBEncoding; 
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -119,7 +124,7 @@ class Level1 {
     this.scene.add(ambientLight);
 
     //white spotlight shine on the doll
-    //cast dynamic shadow
+    //cast shadow on doll
     dollLight = new THREE.SpotLight(0xff0000, 4);
     dollLight.castShadow = true;
     dollLight.shadow.bias = -0.0001;
@@ -167,7 +172,9 @@ class Level1 {
     llight.position.set(250, 0, 0);
     this.scene.add(llight);
 
-    //add fog of color white 
+    //add black fog to scene to darken it completely
+    //then gradually reduce it till the scene is clear
+    // then the timer begins
     this.scene.fog = new THREE.Fog(0x000000, 0.015, 1);
    
     this.addGround();
@@ -373,7 +380,7 @@ class Level1 {
     setTimeout(() => {
       startBtn.innerText = "start"
 
-    }, 12000);
+    }, 15000);
     setTimeout(() => {
       startBtn.addEventListener('click', () => {
         if (startBtn.innerText == "START") {
@@ -453,12 +460,17 @@ class Level1 {
     this.cameraTop.updateProjectionMatrix();
   }
 
-  check() {
+  async check() {
     if (this.dollState.getState() == 'red' && (this.playerControls.State == 'walk' || this.playerControls.State == 'run' || this.playerControls.State == 'dance')) {
+      loseMusic.play();
+      await this.delay(500);
       window.location.replace("../html/loseScreen.html");
     }
     if (timeLeft == 0 && this.playerControls._position.z > -200) {
+      loseMusic.play();
+      await this.delay(500);
       window.location.replace("../html/loseScreen.html");
+      
     }
     if (this.timeLeft != 0 && this.playerControls._position.z <= -200) {
       window.location.replace("../html/winScreen.html");

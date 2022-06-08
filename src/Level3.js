@@ -66,10 +66,10 @@ class Level3 {
     this.cameraTop = new THREE.PerspectiveCamera(45, 60, 2, 1000);
     this.cameraTop.position.set(0, -10, 0);
 
-
-    // this.mirrorcamera = new THREE.PerspectiveCamera(50,window.innerWidth / window.innerHeight,1,1000);
-    // this.camera.position.set(0, 0, 500);
-
+    this.controls = new OrbitControls(
+      this.cameraTop, this.renderer.domElement);
+    this.controls.target.set(0, -10, 0);
+    this.controls.update();
     this.scene.add(this.camera);
     this.scene.add(this.cameraTop);
 
@@ -77,9 +77,6 @@ class Level3 {
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     this.scene.add(ambientLight);
 
-    // var pointlight = new THREE.PointLight(0xffffff, -0.001);
-    // pointlight.position.set(0, 0, 200);
-    // this.scene.add(pointlight);
 
     //directional light for character shadow
     var slight = new THREE.DirectionalLight(0xFFFFFF, 1.0);
@@ -105,11 +102,6 @@ class Level3 {
     var flight = new THREE.DirectionalLight(0xffffff, 0.5);
     flight.position.set(0, 0, 300);
     this.scene.add(flight);
-    
-    // //light shining onto back wall
-    // var flight = new THREE.DirectionalLight(0xffffff, 0.5);
-    // flight.position.set(0, 0, -200);
-    // this.scene.add(flight);
 
     //light shining onto right wall
     var rlight = new THREE.DirectionalLight(0xffffff, 0.4);
@@ -260,8 +252,6 @@ class Level3 {
     mirrorBack1.position.x = -217 + posx;
     mirrorBack1.position.y = 8 + posy;
     mirrorBack1.position.z = -300;
-    // mirrorBack1.rotation.y = Math.PI / 2;
-    // mirrorBack1.rotation.y = Math.PI ;
 
     this.scene.add(mirrorBack1);
     
@@ -299,8 +289,6 @@ class Level3 {
     rightWall.rotateY(Math.PI / 2);
     this.scene.add(rightWall);
   }
-  
-  
   
   addTree() {
     const loader = new GLTFLoader()
@@ -353,7 +341,6 @@ class Level3 {
       this.scene.add(gltf.scene);
       this.doll = gltf.scene;
     })
-    return this.doll;
   }
   async loadSoldierModel(x, y, z) {
     const loader = new GLTFLoader();
@@ -371,7 +358,7 @@ class Level3 {
     setTimeout(() => {
       startBtn.innerText = "start"
 
-    }, 8000);
+    }, 15000);
     setTimeout(() => {
       startBtn.addEventListener('click', () => {
         if (startBtn.innerText == "START") {
@@ -399,9 +386,6 @@ class Level3 {
     text.style.color = '#f00';
 
   }
-  async moveright(){
-    
-  }
 
   async start() {
     this.lookBackward();
@@ -412,6 +396,7 @@ class Level3 {
   }
 
   async timer() {
+    soundManager.backgroundLevel3Song.play();
     await this.delay(1000)
     text.innerText = "Starting in 5"
     await this.delay(1000)
@@ -450,15 +435,15 @@ class Level3 {
     if (this.dollState.getState() == 'red' && (this.playerControls.State == 'walk' || this.playerControls.State == 'run' || this.playerControls.State == 'dance')) {
       
       loseMusic.play();
-      await this.delay(2000);
+      await this.delay(500);
 
-      window.location.replace("../html/losescreen3.html");
+      window.location.replace("../html/loseScreen3.html");
     }
     if (timeLeft == 0 && this.playerControls._position.z > -200) {
       loseMusic.play();
-      await this.delay(2000);
+      await this.delay(500);
       
-      window.location.replace("../html/losescreen3.html");
+      window.location.replace("../html/loseScreen3.html");
     }
     if (this.timeLeft != 0 && this.playerControls._position.z <= -200) {
       window.location.replace("../html/winScreen3.html");
@@ -470,8 +455,6 @@ class Level3 {
       if (this.previousRAF === null) {
         this.previousRAF = t;
       }
-      // wall.position.set(new THREE.Vector3( 0, -45, 250));
-      // console.log(wall.position.x);
       this.check();
       this.OnWindowResize();
       this.animate();

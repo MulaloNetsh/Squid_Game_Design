@@ -1,4 +1,9 @@
 import {IdleState,WalkState,RunState,DanceState} from './playerStates.js'
+
+//This class is used to store the states of the player
+// and allows us to access it from any other class, it
+// stores the states and updates the states. 
+//It is designed so that a player is never in more than one state at a time
 class FiniteStateMachine {
     constructor() {
       this._states = {};

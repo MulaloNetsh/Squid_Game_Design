@@ -9,6 +9,8 @@ import { soundManager } from './soundManager.js';
 import { InstancedFlow } from '../modules/CurveModifier.js';
 import { FontLoader } from '../modules/FontLoader.js';
 import { TextGeometry } from '../modules/TextGeometry.js';
+
+const loseMusic = new Audio('../sounds/gunshot.mp3')
 let insetWidth, insetHeight;
 let pointLight;
 let starGeo;
@@ -443,7 +445,7 @@ class Level2 {
     setTimeout(() => {
       startBtn.innerText = "start"
 
-    }, 12000);
+    }, 15000);
     setTimeout(() => {
       startBtn.addEventListener('click', () => {
         if (startBtn.innerText == "START") {
@@ -516,15 +518,21 @@ class Level2 {
     this.cameraTop.updateProjectionMatrix();
   }
 
-  check() {
+  async  check() {
     if (this.dollState.getState() == 'red' && (this.playerControls.State == 'walk' || this.playerControls.State == 'run' || this.playerControls.State == 'dance')) {
+      loseMusic.play();
+      await this.delay(500);
       window.location.replace("../html/loseScreen2.html");
     }
     if (timeLeft == 0 && this.playerControls._position.z > -200) {
+      loseMusic.play();
+      await this.delay(500);
       window.location.replace("../html/loseScreen2.html");
     }
     if (this.timeLeft != 0 && this.playerControls._position.z <= -200) {
-      window.location.replace("../html/winScreen2.html"); //CHANGE TO LEVEL 3
+      loseMusic.play();
+      await this.delay(500);
+      window.location.replace("../html/winScreen2.html"); 
     }
 
   }
