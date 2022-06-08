@@ -424,7 +424,7 @@ class Level3 {
     text.innerText = "Starting in 1"
     await this.delay(1000)
     this.start();
-    for (let i = 8; i >= 0; i--) {
+    for (let i = 50; i >= 0; i--) {
       text.innerText = (i + " : Seconds Left");
       timeLeft = i;
       await this.delay(1000)
