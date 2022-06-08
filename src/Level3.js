@@ -123,7 +123,7 @@ class Level3 {
 
 
     this.addGround();
-    //this.addCheckpointLine();
+    this.addCheckpointLine();
     this.addTree();
     this.addSideWalls();
     this.addFrontWall();
