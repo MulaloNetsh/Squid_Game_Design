@@ -7,7 +7,6 @@ class BasicCharacterControllerProxy {
     constructor(animations) {
       this._animations = animations;
     }
-  
     get animations() {
       return this._animations;
     }
@@ -248,7 +247,6 @@ class BasicCharacterControllerProxy {
           this._keys.shift = false;
           break;
       }
-  
     }
   };
 export{BasicCharacterController};
